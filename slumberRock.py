@@ -4,6 +4,7 @@ import math
 import pygame
 from os import listdir
 from os.path import isfile, join
+
 pygame.init()
 
 pygame.display.set_caption("SlumberRock")
@@ -12,9 +13,41 @@ pygame.display.set_caption("SlumberRock")
 WIDTH, HEIGHT = 1220, 600
 FPS = 40
 PLAYER_VEL = 8
-
+GRAVITY = 0.8
+FLAP = -10
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
+class Player(pygame.sprite.Sprite):
+    COLOR = (255, 231, 0)
+
+    def __init__(self, x, y, width, height):
+        super().__init__()
+        self.image = pygame.Surface((width, height))
+        self.image.fill(self.COLOR)
+        self.rect = self.image.get_rect()
+        self.rect.topleft = (x, y)
+        self.x_vel = 0
+        self.y_vel = 0
+        self.gravity = GRAVITY
+        self.mask = pygame.mask.from_surface(self.image)
+
+    def move(self, dx, dy):
+        self.rect.x += dx
+        self.rect.y += dy
+    def update(self):
+        self.y_vel += self.gravity
+        self.rect.y += self.y_vel
+
+        if self.rect.bottom > HEIGHT or self.rect.top < 0:
+            self.rect.y -= self.y_vel
+            self.y_vel = 0
+
+    def flap(self):
+        self.y_vel = FLAP
+        self.gravity *= -1
+
+        
+        
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
     _, _, width, height = image.get_rect()
@@ -27,15 +60,21 @@ def get_background(name):
 
     return tiles, image
 
-def draw(window, background, bg_image):
+def draw(window, background, bg_image, player):
     for tile in background:
         window.blit(bg_image, tile)
-        
-    pygame.display.update()    
+    
+    window.blit(player.image, player.rect)
+    pygame.display.update()
+  
 
 def main(window):
   clock = pygame.time.Clock()
   background, bg_image = get_background("srbg.png")
+  player = Player(WIDTH // 4, HEIGHT // 2, 50, 50)
+
+  all_sprites = pygame.sprite.Group()
+  all_sprites.add(player)
 
   run = True
   while run :
@@ -45,7 +84,12 @@ def main(window):
         if event.type == pygame.QUIT:
            run = False
            break
-     draw(window, background, bg_image)
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                player.flap()
+
+     all_sprites.update()
+     draw(window, background, bg_image, player)
   pygame.quit()
   quit()  
 
