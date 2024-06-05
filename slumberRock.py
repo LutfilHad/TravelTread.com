@@ -1,6 +1,4 @@
 import os
-import random
-import math
 import pygame
 from os import listdir
 from os.path import isfile, join
@@ -17,40 +15,51 @@ GRAVITY = 0.8
 FLAP = -10
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
-def flip(sprites):
-    return[pygame.transform.flip(sprites, True, True) for sprite in sprites]
-def load_sprite_sheets()
-class Player(pygame.sprite.Sprite):
-    COLOR = (255, 231, 0)
+RUNNING = [pygame.image.load(os.path.join("/Users/ahmadmunqiz/Documents/GitHub/Slumberock/assets/MainCharacters /VirtualGuy", "run.png"))]
+JUMPING = [pygame.image.load(os.path.join("/Users/ahmadmunqiz/Documents/GitHub/Slumberock/assets/MainCharacters /VirtualGuy", "jump.png"))]
 
-    def __init__(self, x, y, width, height):
-        super().__init__()
-        self.image = pygame.Surface((width, height))
-        self.image.fill(self.COLOR)
-        self.rect = self.image.get_rect()
-        self.rect.topleft = (x, y)
-        self.x_vel = 0
-        self.y_vel = 0
-        self.gravity = GRAVITY
-        self.mask = pygame.mask.from_surface(self.image)
+class Character:
+    x_pos = 80
+    y_pos = 300
 
-    def move(self, dx, dy):
-        self.rect.x += dx
-        self.rect.y += dy
-    def update(self):
-        self.y_vel += self.gravity
-        self.rect.y += self.y_vel
+    def __init__(self):
+        self.run_imgs = RUNNING
+        self.jump_imgs = JUMPING
 
-        if self.rect.bottom > HEIGHT or self.rect.top < 0:
-            self.rect.y -= self.y_vel
-            self.y_vel = 0
+        self.mc_run = True
+        self.mc_jump = False
 
-    def flap(self):
-        self.y_vel = FLAP
-        self.gravity *= -1
+        self.step_index = 0 
+        self.image = self.run_imgs[0]
+        self.mc_rect = self.image.get_rect()
+        self.mc_rect.x = self.x_pos
+        self.mc_rect.y = self.y_pos
 
-        
-        
+    def update(self, userinput):
+        if self.mc_run :
+            self.run
+        if self.mc_jump :
+            self.mc_jump
+
+        if self.step_index >= 10:
+            self.step_index = 0
+
+        if userinput[pygame.K_UP] and not self.mc_jump:
+            self.mc_run = False 
+            self.mc_jump = True
+        elif userinput[pygame.K_UP] and not self.mc_jump:  
+            self.mc_run = True    
+            self.mc_jump = False
+
+    def run(self) :
+        self.image = self.run_imgs[self.step_index // 5]
+        self.mc_rect = self.image.get_rect()
+        self.mc_rect.x = self.x_pos
+        self.mc_rect.y = self.y_pos
+
+    def jump(self):
+        pass
+
 def get_background(name):
     image = pygame.image.load(join("assets", "Background", name))
     _, _, width, height = image.get_rect()
@@ -63,19 +72,17 @@ def get_background(name):
 
     return tiles, image
 
-def draw(window, background, bg_image, player):
+def draw(window, background, bg_image, self):
     for tile in background:
-        window.blit(bg_image, tile)
+        window.blit(bg_image, tile, (self.mc_rect.x, self.mc_rect.y))
     
-    window.blit(player.image, player.rect)
     pygame.display.update()
   
 
 def main(window):
   clock = pygame.time.Clock()
   background, bg_image = get_background("srbg.png")
-  player = Player(WIDTH // 4, HEIGHT // 2, 50, 50)
-
+  player = Character()
 
 
   run = True
@@ -86,12 +93,11 @@ def main(window):
         if event.type == pygame.QUIT:
            run = False
            break
-        elif event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE:
-                player.flap()
+     draw(window, background, bg_image, player )
+     userinput = pygame.key.get_pressed()
 
-
-     draw(window, background, bg_image, player)
+     player.draw(window)
+     player.update(userinput)
   pygame.quit()
   quit()  
 
