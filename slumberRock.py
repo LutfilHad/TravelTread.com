@@ -17,6 +17,9 @@ GRAVITY = 0.8
 FLAP = -10
 window = pygame.display.set_mode((WIDTH, HEIGHT))
 
+def flip(sprites):
+    return[pygame.transform.flip(sprites, True, True) for sprite in sprites]
+def load_sprite_sheets()
 class Player(pygame.sprite.Sprite):
     COLOR = (255, 231, 0)
 
@@ -73,8 +76,7 @@ def main(window):
   background, bg_image = get_background("srbg.png")
   player = Player(WIDTH // 4, HEIGHT // 2, 50, 50)
 
-  all_sprites = pygame.sprite.Group()
-  all_sprites.add(player)
+
 
   run = True
   while run :
@@ -88,7 +90,7 @@ def main(window):
             if event.key == pygame.K_SPACE:
                 player.flap()
 
-     all_sprites.update()
+
      draw(window, background, bg_image, player)
   pygame.quit()
   quit()  
