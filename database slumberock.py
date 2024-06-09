@@ -1,98 +1,60 @@
-import sqlite3
+import pygame
+import requests
 
-# Connect to SQLite database
-conn = sqlite3.connect('slumberock_game.db')
-cursor = conn.cursor()
+# Initialize Pygame
+pygame.init()
 
-# Create Players table
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Players (
-    player_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-)
-''')
+# Set up the display
+screen = pygame.display.set_mode((800, 600))
+pygame.display.set_caption("Pygame with Ranking System")
 
-def add_player(name):
-    conn = sqlite3.connect('slumberock_game.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-    INSERT INTO Players (name) VALUES (?)
-    ''', (name,))
-    conn.commit()
-    conn.close()
+# Define colors
+WHITE = (255, 255, 255)
+RED = (255, 0, 0)
 
-# Create Scores table
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Scores (
-    score_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    player_id INTEGER,
-    score INTEGER,
-    game_mode TEXT,
-    score_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (player_id) REFERENCES Players(player_id)
-)
-''')
+# Define player properties
+player_pos = [400, 300]
+player_size = 50
 
-def add_score(player_id, score, game_mode):
-    conn = sqlite3.connect('slumberock_game.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-    INSERT INTO Scores (player_id, score, game_mode) VALUES (?, ?, ?)
-    ''', (player_id, score, game_mode))
-    conn.commit()
-    conn.close()
+# Function to add or update player in the database
+def add_or_update_player(name, score):
+    url = 'http://localhost:3000/add-or-update-player'
+    data = {'name': name, 'score': score}
+    response = requests.post(url, json=data)
+    return response.json()
 
-def get_high_scores(limit=10):
-    conn = sqlite3.connect('slumberock_game.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-    SELECT Players.name, Scores.score, Scores.game_mode, Scores.score_date
-    FROM Scores
-    JOIN Players ON Scores.player_id = Players.player_id
-    ORDER BY Scores.score DESC
-    LIMIT ?
-    ''', (limit,))
-    rows = cursor.fetchall()
-    conn.close()
-    return rows
+# Function to get the leaderboard
+def get_leaderboard():
+    url = 'http://localhost:3000/leaderboard'
+    response = requests.get(url)
+    return response.json()
 
-# Create Characters table
-cursor.execute('''
-CREATE TABLE IF NOT EXISTS Characters (
-    character_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    character_name TEXT NOT NULL
-)
-''')
+# Main game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+        elif event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE:
+                # Add or update player in the database when space is pressed
+                response = add_or_update_player("Player1", 100)
+                print(response)
+            elif event.key == pygame.K_l:
+                # Get the leaderboard when 'l' is pressed
+                leaderboard = get_leaderboard()
+                print("Leaderboard:")
+                for player in leaderboard:
+                    print(f"{player['name']}: {player['score']}")
 
-def add_character(character_name):
-    conn = sqlite3.connect('slumberock_game.db')
-    cursor = conn.cursor()
-    cursor.execute('''
-    INSERT INTO Characters (character_name) VALUES (?)
-    ''', (character_name,))
-    conn.commit()
-    conn.close()
+    # Fill the screen with white
+    screen.fill(WHITE)
 
-# Adding a new player
-add_player('Ali')
-add_player('Abu')
+    # Draw the player
+    pygame.draw.rect(screen, RED, (player_pos[0], player_pos[1], player_size, player_size))
 
-# Adding scores for players
-add_score(1, 1500, 'Single Player')
-add_score(2, 2000, 'Multiplayer')
-add_score(1, 1800, 'Multiplayer')
+    # Update the display
+    pygame.display.flip()
 
-# Adding characters for players to choose
-add_character('Character 1')
-add_character('Character 2')
-add_character('Character 3')
-
-# Retrieving high scores
-high_scores = get_high_scores(5)
-for score in high_scores:
-    print(score)
-
-# Commit the changes and close the connection
-conn.commit()
-conn.close()
+# Quit Pygame
+pygame.quit()
