@@ -1,4 +1,39 @@
 import pygame
+
+class Player(pygame.sprite.Sprite):
+    def __init__(self, pos_x, pos_y):
+        super().__init__()
+        self.sprite = []
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_01.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_02.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_03.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_04.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_05.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_06.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_07.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_08.png'))
+        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_09.png'))
+        self.current_sprite = 0
+        self.image = self.sprite[self.current_sprite]
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [pos_x, pos_y]
+        self.flipped_image = self.image
+
+
+    def update(self, gravity_direction, x, y):
+        self.current_sprite += 0.2  
+        if self.current_sprite >= len(self.sprite):
+            self.current_sprite = 0  
+
+        self.image = self.sprite[int(self.current_sprite)]
+        if gravity_direction == "up":
+            self.flipped_image = pygame.transform.flip(self.image, False, True)
+        else:
+            self.flipped_image = self.image
+
+        self.rect.topleft = [x, y]            
+
 pygame.init()
 
 win = pygame.display.set_mode((1100,700))
@@ -9,12 +44,16 @@ x = 50
 y = 600
 width = 50
 height = 70
-vel =10
-gravity_vel = 10
+vel =5
+gravity_vel = 7
 gravity_direction = "down" 
 ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png')
 ajim = pygame.transform.scale(ajim, (width, height))
 space_pressed = False
+
+player = Player(x, y)
+all_sprites = pygame.sprite.Group()
+all_sprites.add(player)
 
 run = True
 
@@ -44,23 +83,19 @@ while run:
     else:
         y -= gravity_vel    
 
-
     if y > scr_height - height:
         y = scr_height - height
     elif y < 0:
         y = 0
 
     if x > scr_width - width:
-        x=0
+        x = 0
 
-    if gravity_direction == "down":
-        flipped_ajim = ajim
-    else:
-        flipped_ajim = pygame.transform.flip(ajim, False, True)  
+    player.update(gravity_direction, x, y)
 
 
     win.fill((0,0,0))  
-    win.blit(flipped_ajim, (x,y)) 
+    win.blit(player.flipped_image, player.rect.topleft)
     pygame.display.update() 
     
 pygame.quit()
