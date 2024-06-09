@@ -7,18 +7,19 @@ scr_width = 1100
 scr_height = 700
 x = 50
 y = 600
-width = 40
-height = 60
-vel =5
-gravity_vel = 5 
+width = 50
+height = 70
+vel =10
+gravity_vel = 10
 gravity_direction = "down" 
-
+ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png')
+ajim = pygame.transform.scale(ajim, (width, height))
 space_pressed = False
 
 run = True
 
 while run:
-    pygame.time.delay(50)
+    pygame.time.delay(30)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -52,9 +53,14 @@ while run:
     if x > scr_width - width:
         x=0
 
+    if gravity_direction == "down":
+        flipped_ajim = ajim
+    else:
+        flipped_ajim = pygame.transform.flip(ajim, False, True)  
 
-    win.fill((0,0,0)) 
-    pygame.draw.rect(win, (255,0,0), (x, y, width, height))   
+
+    win.fill((0,0,0))  
+    win.blit(flipped_ajim, (x,y)) 
     pygame.display.update() 
     
 pygame.quit()
