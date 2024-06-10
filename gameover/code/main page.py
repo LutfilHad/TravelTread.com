@@ -49,9 +49,9 @@ def game_over():
         MENU_RECT = MENU_TEXT.get_rect(center=(640, 100))
 
         PLAY_BUTTON = Button(image=pygame.image.load("Play Rect.png"), pos=(640, 300), 
-                            text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+                            text_input="PLAY", font=get_font(75), base_color="#d7fcd4", hovering_color="Green")
         QUIT_BUTTON = Button(image=pygame.image.load("Quit Rect.png"), pos=(640, 450), 
-                            text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="White")
+                            text_input="QUIT", font=get_font(75), base_color="#d7fcd4", hovering_color="Green")
 
         SCREEN.blit(MENU_TEXT, MENU_RECT)
 
