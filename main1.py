@@ -55,6 +55,13 @@ player = Player(x, y)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
+background = pygame.image.load('assets/background/1BG.png').convert()
+bg_width = scr_width
+bg_height = scr_height
+background = pygame.transform.scale(background, (bg_width, bg_height))
+bg_x1 = 0
+bg_x2 = bg_width
+
 run = True
 
 while run:
@@ -93,8 +100,18 @@ while run:
 
     player.update(gravity_direction, x, y)
 
+    bg_x1 -= vel
+    bg_x2 -= vel
+
+    if bg_x1 <= -bg_width:
+        bg_x1 = bg_width
+    if bg_x2 <= -bg_width:
+        bg_x2 = bg_width
+
 
     win.fill((0,0,0))  
+    win.blit(background, (bg_x1, 0))
+    win.blit(background, (bg_x2, 0)) 
     win.blit(player.flipped_image, player.rect.topleft)
     pygame.display.update() 
     
