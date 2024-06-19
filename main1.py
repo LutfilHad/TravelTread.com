@@ -1,24 +1,36 @@
 import pygame
+import random
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
         super().__init__()
         self.sprite = []
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_01.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_02.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_03.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_04.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_05.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_06.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_07.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_08.png'))
-        self.sprite.append(pygame.image.load('assets/MainCharacters /ajim/Ajim_09.png'))
+        self.load_sprites ()
         self.current_sprite = 0
         self.image = self.sprite[self.current_sprite]
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
         self.flipped_image = self.image
+
+    def load_sprites(self):
+        sprite_paths = [
+            'assets/MainCharacters /ajim/Ajim_00.png',
+            'assets/MainCharacters /ajim/Ajim_01.png',
+            'assets/MainCharacters /ajim/Ajim_02.png',
+            'assets/MainCharacters /ajim/Ajim_03.png',
+            'assets/MainCharacters /ajim/Ajim_04.png',
+            'assets/MainCharacters /ajim/Ajim_05.png',
+            'assets/MainCharacters /ajim/Ajim_06.png',
+            'assets/MainCharacters /ajim/Ajim_07.png',
+            'assets/MainCharacters /ajim/Ajim_08.png',
+            'assets/MainCharacters /ajim/Ajim_09.png'
+        ]
+        for path in sprite_paths:
+            image = pygame.image.load(path)
+            width = int(image.get_width() * 2)
+            height = int(image.get_height() * 2)
+            scaled_image = pygame.transform.scale(image, (width, height))
+            self.sprite.append(scaled_image)
 
 
     def update(self, gravity_direction, x, y):
@@ -32,7 +44,30 @@ class Player(pygame.sprite.Sprite):
         else:
             self.flipped_image = self.image
 
-        self.rect.topleft = [x, y]            
+        self.rect.topleft = [x, y]           
+
+class Platform(pygame.sprite.Sprite):
+    def __init__(self, x, y, width, height, image_path):
+        super().__init__()
+        self.image = pygame.image.load(image_path).convert_alpha()
+        self.image = pygame.transform.scale(self.image, (width, height))
+        self.rect = self.image.get_rect()
+        self.rect.topleft = [x, y]
+
+    def update(self, vel):
+        self.rect.x -= vel
+        if self.rect.right < 0:
+            self.kill()
+
+def generate_platform(platforms, image_path, scr_width, scr_height, y_positions):
+    platform_width = random.randint(200, 400)
+    platform_height = 30
+    platform_x = scr_width + random.randint(200, 300)
+    platform_y = random.choice(y_positions)
+    platform = Platform(platform_x, platform_y, platform_width, platform_height, image_path)
+    platforms.add(platform)
+
+
 
 pygame.init()
 
@@ -41,7 +76,7 @@ pygame.display.set_caption("slumberRock")
 scr_width = 1100
 scr_height = 700
 x = 50
-y = 600
+y = 400
 width = 50
 height = 70
 vel =5
@@ -61,8 +96,14 @@ bg_height = scr_height
 background = pygame.transform.scale(background, (bg_width, bg_height))
 bg_x1 = 0
 bg_x2 = bg_width
+platform_image_path = 'assets/Terrain/platform3.png'
+platforms = pygame.sprite.Group()
+y_positions = [500, 400, 300, 200] 
+for _ in range(4):
+    generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
 
 run = True
+platform_timer = 0 
 
 while run:
     pygame.time.delay(30)
@@ -100,6 +141,14 @@ while run:
 
     player.update(gravity_direction, x, y)
 
+    platforms.update(vel)
+
+    platform_timer += 1
+    if platform_timer >= 60: 
+        platform_timer = 0
+        generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
+
+
     bg_x1 -= vel
     bg_x2 -= vel
 
@@ -108,11 +157,21 @@ while run:
     if bg_x2 <= -bg_width:
         bg_x2 = bg_width
 
+    if pygame.sprite.spritecollide(player, platforms, False):
+        if gravity_direction == "down":
+            y -= gravity_vel  
+        else:
+            y += gravity_vel  
+
+
+
 
     win.fill((0,0,0))  
     win.blit(background, (bg_x1, 0))
     win.blit(background, (bg_x2, 0)) 
     win.blit(player.flipped_image, player.rect.topleft)
+    platforms.draw(win)
+
     pygame.display.update() 
     
 pygame.quit()
