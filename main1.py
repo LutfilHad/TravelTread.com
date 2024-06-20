@@ -98,7 +98,7 @@ bg_x1 = 0
 bg_x2 = bg_width
 platform_image_path = 'assets/Terrain/platform3.png'
 platforms = pygame.sprite.Group()
-y_positions = [500, 400, 300, 200] 
+y_positions = [600, 400, 300, 200] 
 for _ in range(4):
     generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
 
