@@ -123,7 +123,7 @@ x = 100  # Adjusted starting position
 y = 400
 width = 50
 height = 70
-vel = 10  # Increased player horizontal velocity
+vel = 8  # Increased player horizontal velocity
 gravity_vel = 12
 gravity_direction = "down"
 ajim = pygame.image.load('assets/MainCharacters/ajim/Ajim_00.png')
@@ -150,7 +150,7 @@ for _ in range(4):
 run = True
 platform_timer = 0
 trap_timer = 0
-bg_vel = 10  # Adjusted background scroll velocity
+bg_vel = 11 # Adjusted background scroll velocity
 game_over = False
 
 while run:
