@@ -1,5 +1,7 @@
 import pygame
 import random
+import sys
+from start_screen import start_screen
 
 class Player(pygame.sprite.Sprite):
     def __init__(self, pos_x, pos_y):
@@ -32,7 +34,6 @@ class Player(pygame.sprite.Sprite):
             scaled_image = pygame.transform.scale(image, (width, height))
             self.sprite.append(scaled_image)
 
-
     def update(self, gravity_direction, y):
         self.current_sprite += 0.2  
         if self.current_sprite >= len(self.sprite):
@@ -59,126 +60,130 @@ class Platform(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-def generate_platform(platforms, image_path, scr_width, scr_height, y_positions, steps=10):
-    platform_width = random.randint(200, 400)
-    platform_height = 30
-    platform_x = scr_width + random.randint(200, 300)
-    platform_y = random.choice(y_positions)
-    platform = Platform(platform_x + steps * 100, platform_y, platform_width, platform_height, image_path)
+def generate_platform(platforms, image_path, x, y, width, height):
+    platform = Platform(x, y, width, height, image_path)
     platforms.add(platform)
 
+def main():
 
+    pygame.init()
 
-pygame.init()
+    win = pygame.display.set_mode((1100,700))
+    pygame.display.set_caption("slumberRock")
+    scr_width = 1100
+    scr_height = 700
+    player_x = 350
+    y = 400
+    width = 50
+    height = 70
+    vel = 5
+    gravity_vel = 7
+    gravity_direction = "down" 
+    ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png')  # Fixed path
+    ajim = pygame.transform.scale(ajim, (width, height))
+    space_pressed = False
 
-win = pygame.display.set_mode((1100,700))
-pygame.display.set_caption("slumberRock")
-scr_width = 1100
-scr_height = 700
-player_x = 350
-y = 400
-width = 50
-height = 70
-vel =5
-gravity_vel = 7
-gravity_direction = "down" 
-ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png')
-ajim = pygame.transform.scale(ajim, (width, height))
-space_pressed = False
+    player = Player(player_x, y)
+    all_sprites = pygame.sprite.Group()
+    all_sprites.add(player)
 
-player = Player(player_x, y)
-all_sprites = pygame.sprite.Group()
-all_sprites.add(player)
-
-background = pygame.image.load('assets/background/1BG.png').convert()
-bg_width = scr_width
-bg_height = scr_height
-background = pygame.transform.scale(background, (bg_width, bg_height))
-bg_x1 = 0
-bg_x2 = bg_width
-platform_image_path = 'assets/Terrain/platform3.png'
-platforms = pygame.sprite.Group()
-y_positions = [600, 400, 300, 200] 
-for steps in range(10):
-    generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions, steps)
-
-run = True
-platform_timer = 0 
-
-while run:
-    pygame.time.delay(10)
-
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            run = False
+    background = pygame.image.load('assets/background/1BG.png').convert()
+    bg_width = scr_width
+    bg_height = scr_height
+    background = pygame.transform.scale(background, (bg_width, bg_height))
+    bg_x1 = 0
+    bg_x2 = bg_width
+    platform_image_path = 'assets/Terrain/platform3.png'
+    platforms = pygame.sprite.Group()
+    y_positions = [600, 400, 300, 200] 
     
-    keys = pygame.key.get_pressed()
-    
-    if keys[pygame.K_SPACE]:
-        if not space_pressed:
-            if gravity_direction == "down":
-                gravity_direction = "up"
-            else:
-                gravity_direction = "down"
-            space_pressed = True
-    else:
-        space_pressed = False
+    # Generate initial platform under the player
+    initial_platform_width = 300  # Added variable for initial platform width
+    initial_platform_height = 30  # Added variable for initial platform height
+    generate_platform(platforms, platform_image_path, player_x - initial_platform_width // 2, y + height, initial_platform_width, initial_platform_height)  # Generate initial platform
 
-    if gravity_direction == "down":
-        y += gravity_vel
-    else:
-        y -= gravity_vel    
+    # Generate additional platforms
+    for steps in range(1, 10):  # Corrected loop range and function call
+        generate_platform(platforms, platform_image_path, scr_width + steps * 100, random.choice(y_positions), random.randint(200, 400), 30)
 
-    if y > scr_height - height:
-        y = scr_height - height
-    elif y < 0:
-        y = 0
+    start_screen(win, scr_width, scr_height)
 
-    # Check if player touches top or bottom of screen
-    if y <= 0 or y >= scr_height - height:
-        run = False
+    run = True
+    platform_timer = 0 
 
-    # Clamp y within screen boundaries
-    y = max(0, min(y, scr_height - height))
+    while run:
+        pygame.time.delay(20)
 
-    player.rect.topleft = [player_x, y] 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                run = False
+        
+        keys = pygame.key.get_pressed()
+        
+        if keys[pygame.K_SPACE]:
+            if not space_pressed:
+                if gravity_direction == "down":
+                    gravity_direction = "up"
+                else:
+                    gravity_direction = "down"
+                space_pressed = True
+        else:
+            space_pressed = False
 
-    platforms.update(vel)
-
-    platform_timer += 1
-    if platform_timer >= 20: 
-        platform_timer = 0
-        generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
-
-
-    bg_x1 -= vel
-    bg_x2 -= vel
-
-    if bg_x1 <= -bg_width:
-        bg_x1 = bg_width
-    if bg_x2 <= -bg_width:
-        bg_x2 = bg_width
-
-    collided_platforms = pygame.sprite.spritecollide(player, platforms, False)
-    for platform in collided_platforms:
         if gravity_direction == "down":
-            if player.rect.bottom > platform.rect.top and player.rect.top < platform.rect.top:
-                y = platform.rect.top - height
-        elif gravity_direction == "up":
-            if player.rect.top < platform.rect.bottom and player.rect.bottom > platform.rect.bottom:
-                y = platform.rect.bottom
+            y += gravity_vel
+        else:
+            y -= gravity_vel    
 
-    player.update(gravity_direction, y)
+        if y > scr_height - height:
+            y = scr_height - height
+        elif y < 0:
+            y = 0
 
+        # Check if player touches top or bottom of screen
+        if y <= 0 or y >= scr_height - height:
+            run = False
 
+        # Clamp y within screen boundaries
+        y = max(0, min(y, scr_height - height))
 
+        player.rect.topleft = [player_x, y] 
 
-    win.fill((0,0,0))  
-    win.blit(background, (bg_x1, 0))
-    win.blit(background, (bg_x2, 0)) 
-    win.blit(player.flipped_image, player.rect.topleft)
-    platforms.draw(win)
+        platforms.update(vel)
 
-    pygame.display.update() 
-    
-pygame.quit()
+        platform_timer += 1
+        if platform_timer >= 20: 
+            platform_timer = 0
+            generate_platform(platforms, platform_image_path, scr_width + random.randint(200, 300), random.choice(y_positions), random.randint(200, 400), 30)  # Generate platforms periodically
+
+        bg_x1 -= vel
+        bg_x2 -= vel
+
+        if bg_x1 <= -bg_width:
+            bg_x1 = bg_width
+        if bg_x2 <= -bg_width:
+            bg_x2 = bg_width
+
+        collided_platforms = pygame.sprite.spritecollide(player, platforms, False)
+        for platform in collided_platforms:
+            if gravity_direction == "down":
+                if player.rect.bottom > platform.rect.top and player.rect.top < platform.rect.top:
+                    y = platform.rect.top - height
+            elif gravity_direction == "up":
+                if player.rect.top < platform.rect.bottom and player.rect.bottom > platform.rect.bottom:
+                    y = platform.rect.bottom
+
+        player.update(gravity_direction, y)
+
+        win.fill((0,0,0))  
+        win.blit(background, (bg_x1, 0))
+        win.blit(background, (bg_x2, 0)) 
+        win.blit(player.flipped_image, player.rect.topleft)
+        platforms.draw(win)
+
+        pygame.display.update() 
+        
+    pygame.quit()
+
+if __name__ == "__main__":
+    main()
