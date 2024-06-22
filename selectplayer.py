@@ -1,10 +1,14 @@
 import pygame
 import sys
-import os  # For file path handling
+import os
 
 # Initialize Pygame and mixer
-pygame.init()
-pygame.mixer.init()
+try:
+    pygame.init()
+    pygame.mixer.init()
+except Exception as e:
+    print(f"Pygame initialization error: {e}")
+    sys.exit()
 
 # Screen dimensions
 WIDTH, HEIGHT = 800, 600
@@ -18,21 +22,30 @@ GREEN = (0, 255, 0)
 RED = (255, 0, 0)
 
 # Fonts
-default_font = pygame.font.SysFont(None, 50) 
-custom_font_path = 'Robus-BWqOd.otf'  
+default_font = pygame.font.SysFont(None, 50)
+custom_font_path = 'Robus-BWqOd.otf'
 if os.path.isfile(custom_font_path):
-    custom_font = pygame.font.Font(custom_font_path, 50)  
+    custom_font = pygame.font.Font(custom_font_path, 50)
 else:
-    custom_font = default_font  
+    custom_font = default_font
 
 # Load background image
-background = pygame.image.load('background.png')
-background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+background_path = r'c:\Users\lutfil\LTGYESSIR\slumberock.game\background4.png'
+try:
+    background = pygame.image.load(background_path)
+    background = pygame.transform.scale(background, (WIDTH, HEIGHT))
+except pygame.error as e:
+    print(f"Error loading background image: {e}")
+    sys.exit()
 
 # Load character images
-character1_img = pygame.image.load('Ajim_00.png')
-character2_img = pygame.image.load('yaiz_00.png')
-character3_img = pygame.image.load('lut_00.png')
+try:
+    character1_img = pygame.image.load('c:\Users\lutfil\LTGYESSIR\slumberock.game\Ajim_00.png')
+    character2_img = pygame.image.load('c:\Users\lutfil\LTGYESSIR\slumberock.game\yaiz_00.png')
+    character3_img = pygame.image.load('c:\Users\lutfil\LTGYESSIR\slumberock.game\lut_00.png')
+except pygame.error as e:
+    print(f"Error loading character images: {e}")
+    sys.exit()
 
 # Resize character images
 character1_img = pygame.transform.scale(character1_img, (100, 100))
@@ -47,9 +60,14 @@ players = [
 ]
 
 # Load background music and play it continuously
-background_music = pygame.mixer.Sound('slumberock.mp3')
-background_music.set_volume(0.5)
-background_music.play(-1)  # -1 makes the sound play indefinitely
+music_path = 'slumberock.mp3'
+try:
+    background_music = pygame.mixer.Sound(music_path)
+    background_music.set_volume(0.5)
+    background_music.play(-1)
+except pygame.error as e:
+    print(f"Error loading background music: {e}")
+    sys.exit()
 
 # Play button
 play_button_rect = pygame.Rect(270, 450, 200, 50)
@@ -69,7 +87,6 @@ while True:
                 pos = event.pos
                 if play_button_rect.collidepoint(pos):
                     game_started = True
-                    # Add functionality to start game or any other action
                 else:
                     for player in players:
                         if player['rect'].collidepoint(pos):
@@ -92,5 +109,10 @@ while True:
     # Draw play button
     screen.blit(play_text, (play_button_rect.centerx - play_text.get_width() // 2, play_button_rect.centery - play_text.get_height() // 2))
 
-    # Update the display
+    # Update the display 
     pygame.display.flip()
+
+    if game_started:
+        # Add your game logic here after the game starts
+        pass
+

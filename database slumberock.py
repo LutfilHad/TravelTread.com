@@ -1,5 +1,5 @@
 import pygame
-import requests
+import json
 
 # Initialize Pygame
 pygame.init()
