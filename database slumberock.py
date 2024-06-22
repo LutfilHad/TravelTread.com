@@ -25,7 +25,7 @@ def add_or_update_player(name, score):
 
 # Function to get the leaderboard
 def get_leaderboard():
-    url = 'http://localhost:3000/leaderboard'
+    url = ' http://localhost:3000'
     response = requests.get(url)
     return response.json()
 
