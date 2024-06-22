@@ -33,7 +33,7 @@ class Player(pygame.sprite.Sprite):
             self.sprite.append(scaled_image)
 
 
-    def update(self, gravity_direction, x, y):
+    def update(self, gravity_direction, y):
         self.current_sprite += 0.2  
         if self.current_sprite >= len(self.sprite):
             self.current_sprite = 0  
@@ -44,7 +44,7 @@ class Player(pygame.sprite.Sprite):
         else:
             self.flipped_image = self.image
 
-        self.rect.topleft = [x, y]           
+        self.rect.topleft = [self.rect.x, y]           
 
 class Platform(pygame.sprite.Sprite):
     def __init__(self, x, y, width, height, image_path):
@@ -59,12 +59,12 @@ class Platform(pygame.sprite.Sprite):
         if self.rect.right < 0:
             self.kill()
 
-def generate_platform(platforms, image_path, scr_width, scr_height, y_positions):
+def generate_platform(platforms, image_path, scr_width, scr_height, y_positions, steps=10):
     platform_width = random.randint(200, 400)
     platform_height = 30
     platform_x = scr_width + random.randint(200, 300)
     platform_y = random.choice(y_positions)
-    platform = Platform(platform_x, platform_y, platform_width, platform_height, image_path)
+    platform = Platform(platform_x + steps * 100, platform_y, platform_width, platform_height, image_path)
     platforms.add(platform)
 
 
@@ -75,7 +75,7 @@ win = pygame.display.set_mode((1100,700))
 pygame.display.set_caption("slumberRock")
 scr_width = 1100
 scr_height = 700
-x = 50
+player_x = 350
 y = 400
 width = 50
 height = 70
@@ -86,7 +86,7 @@ ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png')
 ajim = pygame.transform.scale(ajim, (width, height))
 space_pressed = False
 
-player = Player(x, y)
+player = Player(player_x, y)
 all_sprites = pygame.sprite.Group()
 all_sprites.add(player)
 
@@ -99,14 +99,14 @@ bg_x2 = bg_width
 platform_image_path = 'assets/Terrain/platform3.png'
 platforms = pygame.sprite.Group()
 y_positions = [600, 400, 300, 200] 
-for _ in range(4):
-    generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
+for steps in range(10):
+    generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions, steps)
 
 run = True
 platform_timer = 0 
 
 while run:
-    pygame.time.delay(30)
+    pygame.time.delay(10)
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -124,8 +124,6 @@ while run:
     else:
         space_pressed = False
 
-    x += vel
-
     if gravity_direction == "down":
         y += gravity_vel
     else:
@@ -136,15 +134,19 @@ while run:
     elif y < 0:
         y = 0
 
-    if x > scr_width - width:
-        x = 0
+    # Check if player touches top or bottom of screen
+    if y <= 0 or y >= scr_height - height:
+        run = False
 
-    player.update(gravity_direction, x, y)
+    # Clamp y within screen boundaries
+    y = max(0, min(y, scr_height - height))
+
+    player.rect.topleft = [player_x, y] 
 
     platforms.update(vel)
 
     platform_timer += 1
-    if platform_timer >= 60: 
+    if platform_timer >= 20: 
         platform_timer = 0
         generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
 
@@ -157,11 +159,16 @@ while run:
     if bg_x2 <= -bg_width:
         bg_x2 = bg_width
 
-    if pygame.sprite.spritecollide(player, platforms, False):
+    collided_platforms = pygame.sprite.spritecollide(player, platforms, False)
+    for platform in collided_platforms:
         if gravity_direction == "down":
-            y -= gravity_vel  
-        else:
-            y += gravity_vel  
+            if player.rect.bottom > platform.rect.top and player.rect.top < platform.rect.top:
+                y = platform.rect.top - height
+        elif gravity_direction == "up":
+            if player.rect.top < platform.rect.bottom and player.rect.bottom > platform.rect.bottom:
+                y = platform.rect.bottom
+
+    player.update(gravity_direction, y)
 
 
 
