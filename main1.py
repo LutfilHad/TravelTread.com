@@ -110,9 +110,15 @@ def main():
 
     run = True
     platform_timer = 0 
+    game_time = 0 
 
     while run:
         pygame.time.delay(20)
+        game_time += 1
+
+        if game_time % 500 == 0:
+            gravity_vel += 1
+            vel += 1
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
