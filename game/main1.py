@@ -11,9 +11,9 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.topleft = [pos_x, pos_y]
         self.flipped_image = self.image
-        self.health = 3  # Health attribute
-        self.heart_image = pygame.image.load('assets/heart.webp')  # Load heart image
-        self.heart_image = pygame.transform.scale(self.heart_image, (30, 30))  # Scale heart image
+        self.health = 3 
+        self.heart_image = pygame.image.load('assets/heart.webp')
+        self.heart_image = pygame.transform.scale(self.heart_image, (30, 30))
 
     def load_sprites(self):
         sprite_paths = [
@@ -49,8 +49,8 @@ class Player(pygame.sprite.Sprite):
         self.rect.topleft = [x, y]
 
     def draw_health_bar(self, win):
-        heart_size = 30  # Size of the heart image
-        heart_spacing = 5  # Spacing between hearts
+        heart_size = 30 
+        heart_spacing = 5 
         for i in range(self.health):
             heart_x = 10 + i * (heart_size + heart_spacing)
             heart_y = 10
@@ -83,7 +83,7 @@ class Trap(pygame.sprite.Sprite):
             self.kill()
 
 def draw_game_over_screen(win):
-    win.fill((0, 0, 0))  # Fill screen with black background
+    win.fill((0, 0, 0))
 
     font = pygame.font.Font('object/font.ttf', 50)
     text = font.render("YOU ARE DEAD", True, (255, 0, 0))
@@ -150,7 +150,7 @@ for _ in range(4):
 run = True
 platform_timer = 0
 trap_timer = 0
-bg_vel = 11 # Adjusted background scroll velocity
+bg_vel = 10
 game_over = False
 
 while run:
@@ -189,14 +189,14 @@ while run:
             y = 0
 
         # Check collisions with platforms
-        player.rect.y = y  # Update player's rect position
+        player.rect.y = y 
         collisions = pygame.sprite.spritecollide(player, platforms, False)
         if collisions:
             if gravity_direction == "down":
                 y = collisions[0].rect.top - height
             else:
                 y = collisions[0].rect.bottom
-            player.rect.y = y  # Update player's rect position after adjustment
+            player.rect.y = y 
 
         player.update(gravity_direction, x, y)
 
@@ -209,11 +209,11 @@ while run:
             generate_platform(platforms, platform_image_path, scr_width, scr_height, y_positions)
 
         trap_timer += 1
-        if trap_timer >= 50:  # Adjust as needed for trap generation frequency
+        if trap_timer >= 50:  #trap generation frequency
             trap_timer = 0
             generate_trap(traps, platforms, trap_image_path)
 
-        bg_x1 -= bg_vel  # Update background scroll speed
+        bg_x1 -= bg_vel 
         bg_x2 -= bg_vel
 
         if bg_x1 <= -bg_width:
