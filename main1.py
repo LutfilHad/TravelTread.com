@@ -70,7 +70,7 @@ def main():
 
     win = pygame.display.set_mode((1100,700))
     pygame.display.set_caption("slumberRock")
-    scr_width = 1100
+    scr_width = 1099 
     scr_height = 700
     player_x = 350
     y = 400
@@ -79,7 +79,7 @@ def main():
     vel = 5
     gravity_vel = 7
     gravity_direction = "down" 
-    ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png')  # Fixed path
+    ajim = pygame.image.load('assets/MainCharacters /ajim/Ajim_00.png') 
     ajim = pygame.transform.scale(ajim, (width, height))
     space_pressed = False
 
@@ -90,13 +90,13 @@ def main():
     background = pygame.image.load('assets/background/1BG.png').convert()
     bg_width = scr_width
     bg_height = scr_height
-    background = pygame.transform.scale(background, (bg_width, bg_height))
-    bg_x1 = 0
-    bg_x2 = bg_width
+  
+    bg_x1 = 1100
+    bg_x2 = 0.01
     platform_image_path = 'assets/Terrain/platform3.png'
     platforms = pygame.sprite.Group()
-    y_positions = [600, 400, 300, 200] 
-    
+    y_positions = [600, 400, 300, 200]
+
     # Generate initial platform under the player
     initial_platform_width = 300  # Added variable for initial platform width
     initial_platform_height = 30  # Added variable for initial platform height
@@ -109,23 +109,24 @@ def main():
     start_screen(win, scr_width, scr_height)
 
     run = True
-    platform_timer = 0 
-    game_time = 0 
+    platform_timer = 0
+    game_time = 0  # Initialize game time
 
     while run:
         pygame.time.delay(20)
-        game_time += 1
+        game_time += 1  # Increment game time
 
-        if game_time % 500 == 0:
-            gravity_vel += 1
-            vel += 1
+        # Increase speed every 500 frames (adjust as needed)
+        if game_time % 100 == 0:
+            gravity_vel += 0
+            vel += 0.05
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
-        
+
         keys = pygame.key.get_pressed()
-        
+
         if keys[pygame.K_SPACE]:
             if not space_pressed:
                 if gravity_direction == "down":
@@ -139,7 +140,7 @@ def main():
         if gravity_direction == "down":
             y += gravity_vel
         else:
-            y -= gravity_vel    
+            y -= gravity_vel
 
         if y > scr_height - height:
             y = scr_height - height
@@ -153,18 +154,19 @@ def main():
         # Clamp y within screen boundaries
         y = max(0, min(y, scr_height - height))
 
-        player.rect.topleft = [player_x, y] 
+        player.rect.topleft = [player_x, y]
 
         platforms.update(vel)
 
         platform_timer += 1
-        if platform_timer >= 20: 
+        if platform_timer >= 20:
             platform_timer = 0
             generate_platform(platforms, platform_image_path, scr_width + random.randint(200, 300), random.choice(y_positions), random.randint(200, 400), 30)  # Generate platforms periodically
 
         bg_x1 -= vel
         bg_x2 -= vel
 
+        # Reset background images to maintain continuous scrolling
         if bg_x1 <= -bg_width:
             bg_x1 = bg_width
         if bg_x2 <= -bg_width:
@@ -181,14 +183,14 @@ def main():
 
         player.update(gravity_direction, y)
 
-        win.fill((0,0,0))  
+        win.fill((0, 0, 0))
         win.blit(background, (bg_x1, 0))
-        win.blit(background, (bg_x2, 0)) 
+        win.blit(background, (bg_x2, 0))
         win.blit(player.flipped_image, player.rect.topleft)
         platforms.draw(win)
 
-        pygame.display.update() 
-        
+        pygame.display.update()
+
     pygame.quit()
 
 if __name__ == "__main__":
